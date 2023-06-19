@@ -1,7 +1,6 @@
-from typing import Any, Dict, TypeVar
+from typing import Any, TypeVar
 
 from django.db.models import Model
-
 from rest_framework.generics import UsesQuerySet
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,7 +11,7 @@ _MT = TypeVar("_MT", bound=Model)
 class CreateModelMixin:
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response: ...
     def perform_create(self: UsesQuerySet[_MT], serializer: BaseSerializer[_MT]) -> None: ...
-    def get_success_headers(self, data: Any) -> Dict[str, str]: ...
+    def get_success_headers(self, data: Any) -> dict[str, str]: ...
 
 class ListModelMixin:
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response: ...

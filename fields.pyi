@@ -1,72 +1,54 @@
 import datetime
 import uuid
-from collections import OrderedDict
+from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping, Sequence
 from decimal import Decimal
 from enum import Enum
 from json import JSONDecoder, JSONEncoder
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Generic,
-    Iterable,
-    List,
-    Mapping,
-    MutableMapping,
-    NoReturn,
-    Optional,
-    Pattern,
-    Protocol,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from re import Pattern
+from typing import Any, Final, Generic, NoReturn, Protocol, TypeVar
 
+from _typeshed import Self
 from django.core.files.base import File
 from django.db import models
 from django.forms import ImageField as DjangoImageField  # noqa: F401
-from typing_extensions import Final
-
+from django_stubs_ext import StrOrPromise
 from rest_framework.serializers import BaseSerializer
 from rest_framework.validators import Validator
+from typing_extensions import TypeAlias
 
 class _Empty(Enum):
-    sentinel = 0
+    sentinel = 0  # noqa: Y015
 
 empty: Final = _Empty.sentinel
 
 class BuiltinSignatureError(Exception): ...
 
 class CreateOnlyDefault:
-    requires_context: bool = ...
-    default: Any = ...
+    requires_context: bool
+    default: Any
     def __init__(self, default: Any) -> None: ...
     def __call__(self, serializer_field: Field): ...
 
 class CurrentUserDefault:
-    requires_context: bool = ...
+    requires_context: bool
     def __call__(self, serializer_field: Field): ...
 
 class SkipField(Exception): ...
 
 class Option(Protocol):
-    start_option_group: bool = ...
-    end_option_group: bool = ...
-    label: str
+    start_option_group: bool
+    end_option_group: bool
+    label: StrOrPromise
     value: str
-    display_text: str
+    display_text: StrOrPromise
 
 def is_simple_callable(obj: Callable) -> bool: ...
-def get_attribute(instance: Any, attrs: Optional[List[str]]) -> Any: ...
+def get_attribute(instance: Any, attrs: list[str] | None) -> Any: ...
 def set_value(dictionary: MutableMapping[str, Any], keys: Sequence[str], value: Any) -> None: ...
-def to_choices_dict(choices: Iterable[Any]) -> OrderedDict: ...
-def flatten_choices_dict(choices: Dict[Any, Any]) -> OrderedDict: ...
+def to_choices_dict(choices: Iterable[Any]) -> dict: ...
+def flatten_choices_dict(choices: dict[Any, Any]) -> dict: ...
 def iter_options(
-    grouped_choices: OrderedDict, cutoff: Optional[int] = ..., cutoff_text: Optional[str] = ...
+    grouped_choices: dict, cutoff: int | None = ..., cutoff_text: StrOrPromise | None = ...
 ) -> Generator[Option, None, None]: ...
 def get_error_detail(exc_info: Any) -> Any: ...
 
@@ -85,25 +67,25 @@ _RP = TypeVar("_RP")  # Representation Type
 class SupportsToPython(Protocol):
     def to_python(self, value: Any) -> Any: ...
 
-_DefaultInitial = Union[_VT, Callable[[], _VT], None, _Empty]
+_DefaultInitial: TypeAlias = _VT | Callable[[], _VT] | None | _Empty
 
 class Field(Generic[_VT, _DT, _RP, _IN]):
-    allow_null: bool = ...
-    default: Optional[_VT] = ...
-    default_empty_html: Any = ...
-    default_error_messages: Dict[str, str] = ...
-    default_validators: List[Validator[_VT]] = ...
-    error_messages: Dict[str, str] = ...
-    field_name: Optional[str] = ...
-    help_text: Optional[str] = ...
-    initial: Optional[Union[_VT, Callable[[], _VT]]] = ...
-    label: Optional[str]
+    allow_null: bool
+    default: _VT | None
+    default_empty_html: Any
+    default_error_messages: dict[str, StrOrPromise]
+    default_validators: list[Validator[_VT]]
+    error_messages: dict[str, StrOrPromise]
+    field_name: str | None
+    help_text: StrOrPromise | None
+    initial: _VT | Callable[[], _VT] | None
+    label: StrOrPromise | None
     parent: BaseSerializer
     read_only: bool
     required: bool
-    source: Optional[Union[Callable, str]]
-    source_attrs: List[str] = ...
-    style: Dict[str, Any]
+    source: Callable | str | None
+    source_attrs: list[str]
+    style: dict[str, Any]
     write_only: bool
     def __init__(
         self,
@@ -113,24 +95,24 @@ class Field(Generic[_VT, _DT, _RP, _IN]):
         default: _DefaultInitial[_VT] = ...,
         initial: _DefaultInitial[_VT] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[_VT]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[_VT]] | None = ...,
         allow_null: bool = ...,
     ): ...
     def bind(self, field_name: str, parent: BaseSerializer) -> None: ...
     @property
-    def validators(self) -> List[Validator[_VT]]: ...
+    def validators(self) -> list[Validator[_VT]]: ...
     @validators.setter
-    def validators(self, validators: List[Validator[_VT]]) -> None: ...
-    def get_validators(self) -> List[Validator[_VT]]: ...
-    def get_initial(self) -> Optional[_VT]: ...
+    def validators(self, validators: list[Validator[_VT]]) -> None: ...
+    def get_validators(self) -> list[Validator[_VT]]: ...
+    def get_initial(self) -> _VT | None: ...
     def get_value(self, dictionary: Mapping[Any, Any]) -> Any: ...
-    def get_attribute(self, instance: _IN) -> Optional[_RP]: ...
-    def get_default(self) -> Optional[_VT]: ...
-    def validate_empty_values(self, data: Any) -> Tuple[bool, Any]: ...
+    def get_attribute(self, instance: _IN) -> _RP | None: ...
+    def get_default(self) -> _VT | None: ...
+    def validate_empty_values(self, data: Any) -> tuple[bool, Any]: ...
     def run_validation(self, data: Any = ...) -> Any: ...
     def run_validators(self, value: Any) -> None: ...
     def to_internal_value(self, data: _DT) -> _VT: ...
@@ -139,58 +121,58 @@ class Field(Generic[_VT, _DT, _RP, _IN]):
     @property
     def root(self) -> BaseSerializer: ...
     @property
-    def context(self) -> Dict[str, Any]: ...
-    def __new__(cls, *args: Any, **kwargs: Any) -> Field: ...
+    def context(self) -> dict[str, Any]: ...
+    def __new__(cls: type[Self], *args: Any, **kwargs: Any) -> Self: ...
     def __deepcopy__(self, memo: Mapping[Any, Any]) -> Field: ...
 
 class BooleanField(
     Field[
         bool,
-        Union[str, bool, int],
+        str | bool | int,
         bool,
         Any,
     ]
 ):
-    TRUE_VALUES: Set[Union[str, bool, int]] = ...
-    FALSE_VALUES: Set[Union[str, bool, int, float]] = ...
-    NULL_VALUES: Set[Union[str, None]] = ...
+    TRUE_VALUES: set[str | bool | int]
+    FALSE_VALUES: set[str | bool | int | float]
+    NULL_VALUES: set[str | None]
 
 class NullBooleanField(
     Field[
-        Union[bool, None],
-        Optional[Union[str, bool, int]],
+        bool | None,
+        str | bool | int | None,
         bool,
         Any,
     ]
 ):
-    TRUE_VALUES: Set[Union[str, bool, int]] = ...
-    FALSE_VALUES: Set[Union[str, bool, int, float]] = ...
-    NULL_VALUES: Set[Union[str, None]] = ...
+    TRUE_VALUES: set[str | bool | int]
+    FALSE_VALUES: set[str | bool | int | float]
+    NULL_VALUES: set[str | None]
 
 class CharField(Field[str, str, str, Any]):
-    allow_blank: bool = ...
-    trim_whitespace: bool = ...
-    max_length: Optional[int] = ...
-    min_length: Optional[int] = ...
+    allow_blank: bool
+    trim_whitespace: bool
+    max_length: int | None
+    min_length: int | None
     def __init__(
         self,
         *,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[str] = ...,
+        default: _DefaultInitial[StrOrPromise] = ...,
         initial: _DefaultInitial[str] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[str]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[str]] | None = ...,
         allow_null: bool = ...,
         allow_blank: bool = ...,
         trim_whitespace: bool = ...,
         max_length: int = ...,
-        min_length: Optional[int] = ...,
+        min_length: int | None = ...,
     ): ...
 
 class EmailField(CharField): ...
@@ -198,28 +180,28 @@ class EmailField(CharField): ...
 class RegexField(CharField):
     def __init__(
         self,
-        regex: Union[str, Pattern],
+        regex: str | Pattern,
         *,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[str] = ...,
+        default: _DefaultInitial[StrOrPromise] = ...,
         initial: _DefaultInitial[str] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[str]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[str]] | None = ...,
         allow_null: bool = ...,
         allow_blank: bool = ...,
         trim_whitespace: bool = ...,
         max_length: int = ...,
-        min_length: Optional[int] = ...,
+        min_length: int | None = ...,
     ): ...
 
 class SlugField(CharField):
-    allow_unicode: bool = ...
+    allow_unicode: bool
     def __init__(
         self,
         allow_unicode: bool = ...,
@@ -227,41 +209,41 @@ class SlugField(CharField):
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[str] = ...,
+        default: _DefaultInitial[StrOrPromise] = ...,
         initial: _DefaultInitial[str] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[str]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[str]] | None = ...,
         allow_null: bool = ...,
         allow_blank: bool = ...,
         trim_whitespace: bool = ...,
         max_length: int = ...,
-        min_length: Optional[int] = ...,
+        min_length: int | None = ...,
     ): ...
 
 class URLField(CharField): ...
 
-class UUIDField(Field[uuid.UUID, Union[uuid.UUID, str, int], str, Any]):
-    valid_formats: Sequence[str] = ...
+class UUIDField(Field[uuid.UUID, uuid.UUID | str | int, str, Any]):
+    valid_formats: Sequence[str]
     uuid_format: str
     def __init__(
         self,
         *,
-        format: Optional[str] = ...,
+        format: str | None = ...,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
         default: _DefaultInitial[uuid.UUID] = ...,
         initial: _DefaultInitial[uuid.UUID] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[uuid.UUID]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[uuid.UUID]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
@@ -278,23 +260,23 @@ class IPAddressField(CharField):
         default: _DefaultInitial[str] = ...,
         initial: _DefaultInitial[str] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[str]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[str]] | None = ...,
         allow_null: bool = ...,
         allow_blank: bool = ...,
         trim_whitespace: bool = ...,
         max_length: int = ...,
-        min_length: Optional[int] = ...,
+        min_length: int | None = ...,
     ): ...
 
-class IntegerField(Field[int, Union[float, int, str], int, Any]):
-    MAX_STRING_LENGTH: int = ...
-    re_decimal: Pattern = ...
-    max_value: Optional[int] = ...
-    min_value: Optional[int] = ...
+class IntegerField(Field[int, float | int | str, int, Any]):
+    MAX_STRING_LENGTH: int
+    re_decimal: Pattern
+    max_value: int | None
+    min_value: int | None
     def __init__(
         self,
         *,
@@ -306,19 +288,19 @@ class IntegerField(Field[int, Union[float, int, str], int, Any]):
         default: _DefaultInitial[int] = ...,
         initial: _DefaultInitial[int] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[int]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[int]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
-class FloatField(Field[float, Union[float, int, str], str, Any]):
-    MAX_STRING_LENGTH: int = ...
-    re_decimal: Pattern = ...
-    max_value: Optional[float] = ...
-    min_value: Optional[float] = ...
+class FloatField(Field[float, float | int | str, str, Any]):
+    MAX_STRING_LENGTH: int
+    re_decimal: Pattern
+    max_value: float | None
+    min_value: float | None
     def __init__(
         self,
         *,
@@ -330,33 +312,34 @@ class FloatField(Field[float, Union[float, int, str], str, Any]):
         default: _DefaultInitial[float] = ...,
         initial: _DefaultInitial[float] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[float]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[float]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
-class DecimalField(Field[Decimal, Union[int, float, str, Decimal], str, Any]):
-    MAX_STRING_LENGTH: int = ...
-    max_digits: Optional[int]
-    decimal_places: Optional[int]
-    coerce_to_string: Optional[bool]
-    max_value: Optional[Union[Decimal, int, float]]
-    min_value: Optional[Union[Decimal, int, float]]
+class DecimalField(Field[Decimal, int | float | str | Decimal, str, Any]):
+    MAX_STRING_LENGTH: int
+    max_digits: int | None
+    decimal_places: int | None
+    coerce_to_string: bool | None
+    max_value: Decimal | int | float | None
+    min_value: Decimal | int | float | None
     localize: bool
-    rounding: Optional[str]
-    max_whole_digits = Optional[int]
+    rounding: str | None
+    max_whole_digits = int | None  # noqa: Y026
     def __init__(
         self,
-        max_digits: Optional[int],
-        decimal_places: Optional[int],
+        max_digits: int | None,
+        decimal_places: int | None,
         coerce_to_string: bool = ...,
-        max_value: Union[Decimal, int, float] = ...,
-        min_value: Union[Decimal, int, float] = ...,
+        max_value: Decimal | int | float = ...,
+        min_value: Decimal | int | float = ...,
         localize: bool = ...,
-        rounding: Optional[str] = ...,
+        rounding: str | None = ...,
+        normalize_output: bool = ...,
         *,
         read_only: bool = ...,
         write_only: bool = ...,
@@ -364,49 +347,49 @@ class DecimalField(Field[Decimal, Union[int, float, str, Decimal], str, Any]):
         default: _DefaultInitial[Decimal] = ...,
         initial: _DefaultInitial[Decimal] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Decimal]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Decimal]] | None = ...,
         allow_null: bool = ...,
     ): ...
     def validate_precision(self, value: Decimal) -> Decimal: ...
     def quantize(self, value: Decimal) -> Decimal: ...
 
-class DateTimeField(Field[datetime.datetime, Union[datetime.datetime, str], str, Any]):
-    datetime_parser: Callable[[str, str], datetime.datetime] = ...
-    format: Optional[str] = ...
-    input_formats: Sequence[str] = ...
-    timezone: datetime.tzinfo = ...
+class DateTimeField(Field[datetime.datetime, datetime.datetime | str, str, Any]):
+    datetime_parser: Callable[[str, str], datetime.datetime]
+    format: str | None
+    input_formats: Sequence[str]
+    timezone: datetime.tzinfo
     def __init__(
         self,
-        format: Optional[str] = ...,
+        format: str | None = ...,
         input_formats: Sequence[str] = ...,
-        default_timezone: Optional[datetime.tzinfo] = ...,
+        default_timezone: datetime.tzinfo | None = ...,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
         default: _DefaultInitial[datetime.datetime] = ...,
         initial: _DefaultInitial[datetime.datetime] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[datetime.datetime]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[datetime.datetime]] | None = ...,
         allow_null: bool = ...,
     ): ...
     def enforce_timezone(self, value: datetime.datetime) -> datetime.datetime: ...
-    def default_timezone(self) -> Optional[str]: ...
+    def default_timezone(self) -> str | None: ...
 
-class DateField(Field[datetime.date, Union[datetime.date, str], str, Any]):
-    datetime_parser: Callable[[str, str], datetime.datetime] = ...
-    format: Optional[str] = ...
-    input_formats: Sequence[str] = ...
+class DateField(Field[datetime.date, datetime.date | str, str, Any]):
+    datetime_parser: Callable[[str, str], datetime.datetime]
+    format: str | None
+    input_formats: Sequence[str]
     def __init__(
         self,
-        format: Optional[str] = ...,
+        format: str | None = ...,
         input_formats: Sequence[str] = ...,
         read_only: bool = ...,
         write_only: bool = ...,
@@ -414,21 +397,21 @@ class DateField(Field[datetime.date, Union[datetime.date, str], str, Any]):
         default: _DefaultInitial[datetime.date] = ...,
         initial: _DefaultInitial[datetime.date] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[datetime.date]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[datetime.date]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
-class TimeField(Field[datetime.time, Union[datetime.time, str], str, Any]):
-    datetime_parser: Callable[[str, str], datetime.datetime] = ...
-    format: Optional[str] = ...
-    input_formats: Sequence[str] = ...
+class TimeField(Field[datetime.time, datetime.time | str, str, Any]):
+    datetime_parser: Callable[[str, str], datetime.datetime]
+    format: str | None
+    input_formats: Sequence[str]
     def __init__(
         self,
-        format: Optional[str] = ...,
+        format: str | None = ...,
         input_formats: Sequence[str] = ...,
         read_only: bool = ...,
         write_only: bool = ...,
@@ -436,43 +419,43 @@ class TimeField(Field[datetime.time, Union[datetime.time, str], str, Any]):
         default: _DefaultInitial[datetime.time] = ...,
         initial: _DefaultInitial[datetime.time] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[datetime.time]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[datetime.time]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
-class DurationField(Field[datetime.timedelta, Union[datetime.timedelta, str], str, Any]):
-    max_value: Optional[datetime.timedelta] = ...
-    min_value: Optional[datetime.timedelta] = ...
+class DurationField(Field[datetime.timedelta, datetime.timedelta | str, str, Any]):
+    max_value: datetime.timedelta | None
+    min_value: datetime.timedelta | None
     def __init__(
         self,
         *,
-        max_value: Union[datetime.timedelta, int, float] = ...,
-        min_value: Union[datetime.timedelta, int, float] = ...,
+        max_value: datetime.timedelta | int | float = ...,
+        min_value: datetime.timedelta | int | float = ...,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
         default: _DefaultInitial[datetime.timedelta] = ...,
         initial: _DefaultInitial[datetime.timedelta] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[datetime.timedelta]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[datetime.timedelta]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
-class ChoiceField(Field[str, Union[str, int, Tuple[Union[str, int], Union[str, int, tuple]]], str, Any]):
-    html_cutoff: Optional[int] = ...
-    html_cutoff_text: Optional[str] = ...
-    allow_blank: bool = ...
-    grouped_choices: OrderedDict = ...
-    choice_strings_to_values: Dict[str, Any] = ...
-    _choices: OrderedDict = ...
+class ChoiceField(Field[str, str | int | tuple[str | int, str | int | tuple], str, Any]):
+    html_cutoff: int | None
+    html_cutoff_text: StrOrPromise | None
+    allow_blank: bool
+    grouped_choices: dict
+    choice_strings_to_values: dict[str, Any]
+    _choices: dict
     def __init__(
         self,
         choices: Iterable[Any],
@@ -480,21 +463,21 @@ class ChoiceField(Field[str, Union[str, int, Tuple[Union[str, int], Union[str, i
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[Union[str, int]] = ...,
-        initial: _DefaultInitial[Union[str, int]] = ...,
+        default: _DefaultInitial[StrOrPromise | int] = ...,
+        initial: _DefaultInitial[str | int] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
         html_cutoff: int = ...,
-        html_cutoff_text: str = ...,
+        html_cutoff_text: StrOrPromise = ...,
         allow_blank: bool = ...,
     ): ...
     def iter_options(self) -> Iterable[Option]: ...
-    def _get_choices(self) -> Dict[Any, Any]: ...
+    def _get_choices(self) -> dict[Any, Any]: ...
     def _set_choices(self, choices: Iterable[Any]) -> None: ...
     choices = property(_get_choices, _set_choices)
 
@@ -502,29 +485,29 @@ class MultipleChoiceField(
     ChoiceField,
     Field[
         str,
-        Sequence[Union[str, int, Tuple[Union[str, int], Union[str, int]]]],
-        Sequence[Union[str, Tuple[Union[str, int], Union[str, int]]]],
+        Sequence[str | int | tuple[str | int, str | int]],
+        Sequence[str | tuple[str | int, str | int]],
         Any,
     ],
 ):
-    allow_empty: bool = ...
+    allow_empty: bool
     def __init__(
         self,
         choices: Iterable[Any],
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[Union[Set[Union[str, int]], Set[str], Set[int]]] = ...,
-        initial: _DefaultInitial[Union[Set[Union[str, int]], Set[str], Set[int]]] = ...,
+        default: _DefaultInitial[set[str | int] | set[str] | set[int]] = ...,
+        initial: _DefaultInitial[set[StrOrPromise | int] | set[StrOrPromise] | set[int]] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
         html_cutoff: int = ...,
-        html_cutoff_text: str = ...,
+        html_cutoff_text: StrOrPromise = ...,
         allow_blank: bool = ...,
         allow_empty: bool = ...,
     ): ...
@@ -543,21 +526,21 @@ class FilePathField(ChoiceField):
         default: _DefaultInitial[str] = ...,
         initial: _DefaultInitial[str] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
         html_cutoff: int = ...,
-        html_cutoff_text: str = ...,
+        html_cutoff_text: StrOrPromise = ...,
         allow_blank: bool = ...,
     ): ...
 
-class FileField(Field[File, File, Union[str, None], Any]):  # this field can return None without raising!
-    max_length: int = ...
-    allow_empty_file: bool = ...
-    use_url: bool = ...
+class FileField(Field[File, File, str | None, Any]):  # this field can return None without raising!
+    max_length: int
+    allow_empty_file: bool
+    use_url: bool
     def __init__(
         self,
         *,
@@ -567,11 +550,11 @@ class FileField(Field[File, File, Union[str, None], Any]):  # this field can ret
         default: _DefaultInitial[File] = ...,
         initial: _DefaultInitial[File] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[File]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[File]] | None = ...,
         allow_null: bool = ...,
         max_length: int = ...,
         allow_empty_file: bool = ...,
@@ -579,7 +562,7 @@ class FileField(Field[File, File, Union[str, None], Any]):  # this field can ret
     ): ...
 
 class ImageField(FileField):
-    _DjangoImageField: SupportsToPython = ...
+    _DjangoImageField: SupportsToPython
     def __init__(
         self,
         *,
@@ -589,38 +572,38 @@ class ImageField(FileField):
         default: _DefaultInitial[File] = ...,
         initial: _DefaultInitial[File] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[File]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[File]] | None = ...,
         allow_null: bool = ...,
         max_length: int = ...,
         allow_empty_file: bool = ...,
         use_url: bool = ...,
-        _DjangoImageField: Type[SupportsToPython] = ...,
+        _DjangoImageField: type[SupportsToPython] = ...,
     ): ...
 
 class _UnvalidatedField(Field): ...
 
-class ListField(Field[List[Any], List[Any], List[Any], Any]):
-    child: Field = ...
-    allow_empty: bool = ...
-    max_length: Optional[int] = ...
-    min_length: Optional[int] = ...
+class ListField(Field[list[Any], list[Any], list[Any], Any]):
+    child: Field
+    allow_empty: bool
+    max_length: int | None
+    min_length: int | None
     def __init__(
         self,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[List[Any]] = ...,
-        initial: _DefaultInitial[List[Any]] = ...,
+        default: _DefaultInitial[list[Any]] = ...,
+        initial: _DefaultInitial[list[Any]] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[List[Any]]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[list[Any]]] | None = ...,
         allow_null: bool = ...,
         *,
         child: Field = ...,
@@ -628,24 +611,24 @@ class ListField(Field[List[Any], List[Any], List[Any], Any]):
         max_length: int = ...,
         min_length: int = ...,
     ): ...
-    def run_child_validation(self, data: List[Mapping[Any, Any]]) -> Any: ...
+    def run_child_validation(self, data: list[Mapping[Any, Any]]) -> Any: ...
 
-class DictField(Field[Dict[Any, Any], Dict[Any, Any], Dict[Any, Any], Any]):
-    child: Field = ...
-    allow_empty: bool = ...
+class DictField(Field[dict[Any, Any], dict[Any, Any], dict[Any, Any], Any]):
+    child: Field
+    allow_empty: bool
     def __init__(
         self,
         read_only: bool = ...,
         write_only: bool = ...,
         required: bool = ...,
-        default: _DefaultInitial[Dict[Any, Any]] = ...,
-        initial: _DefaultInitial[Dict[Any, Any]] = ...,
+        default: _DefaultInitial[dict[Any, Any]] = ...,
+        initial: _DefaultInitial[dict[Any, Any]] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Dict[Any, Any]]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[dict[Any, Any]]] | None = ...,
         allow_null: bool = ...,
         *,
         child: Field = ...,
@@ -654,14 +637,12 @@ class DictField(Field[Dict[Any, Any], Dict[Any, Any], Dict[Any, Any], Any]):
     def run_child_validation(self, data: Any) -> Any: ...
 
 class HStoreField(DictField):
-    child: CharField = ...
+    child: CharField
 
-class JSONField(
-    Field[Union[Dict[str, Any], List[Dict[str, Any]]], Union[Dict[str, Any], List[Dict[str, Any]]], str, Any]
-):
-    binary: bool = ...
-    encoder: Optional[JSONEncoder] = ...
-    decoder: Optional[JSONDecoder] = ...
+class JSONField(Field[dict[str, Any] | list[dict[str, Any]], dict[str, Any] | list[dict[str, Any]], str, Any]):
+    binary: bool
+    encoder: type[JSONEncoder] | None
+    decoder: type[JSONDecoder] | None
     def __init__(
         self,
         read_only: bool = ...,
@@ -670,26 +651,26 @@ class JSONField(
         default: _DefaultInitial[Mapping[Any, Any]] = ...,
         initial: _DefaultInitial[Mapping[Any, Any]] = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
         *,
         binary: bool = ...,
-        encoder: Optional[JSONEncoder] = ...,
-        decoder: Optional[JSONDecoder] = ...,
+        encoder: type[JSONEncoder] | None = ...,
+        decoder: type[JSONDecoder] | None = ...,
     ): ...
 
 class ReadOnlyField(Field): ...
 class HiddenField(Field): ...
 
 class SerializerMethodField(Field):
-    method_name: str = ...
+    method_name: str
     def __init__(
         self,
-        method_name: Optional[str] = ...,
+        method_name: str | None = ...,
         *,
         read_only: bool = ...,
         write_only: bool = ...,
@@ -697,17 +678,17 @@ class SerializerMethodField(Field):
         default: Any = ...,
         initial: Any = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
     ): ...
 
 class ModelField(Field):
-    model_field: models.Field = ...
-    max_length: int = ...
+    model_field: models.Field
+    max_length: int
     def __init__(
         self,
         model_field: models.Field,
@@ -718,11 +699,11 @@ class ModelField(Field):
         default: Any = ...,
         initial: Any = ...,
         source: str = ...,
-        label: str = ...,
-        help_text: str = ...,
-        style: Dict[str, Any] = ...,
-        error_messages: Dict[str, str] = ...,
-        validators: Optional[Sequence[Validator[Any]]] = ...,
+        label: StrOrPromise = ...,
+        help_text: StrOrPromise = ...,
+        style: dict[str, Any] = ...,
+        error_messages: dict[str, StrOrPromise] = ...,
+        validators: Sequence[Validator[Any]] | None = ...,
         allow_null: bool = ...,
         max_length: int = ...,
     ): ...
